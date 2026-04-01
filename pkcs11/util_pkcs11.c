@@ -1367,10 +1367,23 @@ static CK_RV get_attribute_opaque(CK_ATTRIBUTE_TYPE type,
 
       // NOTE(adma): Data Objects attributes
 
+    /* MODIFIED: return the stored CKA_APPLICATION value when available,
+     * falling back to the original hardcoded string for objects that were
+     * created before this patch and therefore have no meta companion. */
     case CKA_APPLICATION: {
-      char *str = "Opaque object";
-      strcpy((char *) value, str);
-      *length = strlen(str);
+      if (meta_object != NULL && meta_object->cka_application.len > 0) {
+        if (*length < meta_object->cka_application.len) {
+          return CKR_HOST_MEMORY;
+        }
+        *length = meta_object->cka_application.len;
+        memcpy(value, meta_object->cka_application.value,
+               meta_object->cka_application.len);
+      } else {
+        /* Legacy fallback — preserves original behaviour for pre-patch objects */
+        char *str = "Opaque object";
+        strcpy((char *) value, str);
+        *length = strlen(str);
+      }
     } break;
 
     case CKA_OBJECT_ID:
