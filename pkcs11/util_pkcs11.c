@@ -709,6 +709,8 @@ CK_RV get_mechanism_info(yubihsm_pkcs11_slot *slot, CK_MECHANISM_TYPE type,
 #define PKCS11_LABEL_TAG 2
 #define PKCS11_PUBKEY_ID_TAG 3
 #define PKCS11_PUBKEY_LABEL_TAG 4
+#define PKCS11_APPLICATION_TAG  5  // New requirement for opaque objects.
+
 const char META_OBJECT_VERSION[5] = "MDB1";
 
 static uint16_t write_meta_item(uint8_t *target_value, uint8_t tag,
