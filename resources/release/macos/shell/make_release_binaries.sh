@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+if [ "$#" -ne 3 ]; then
+    echo "This script builds release binaries for MacOS. Output files will be found in the directory this script is running from."
+    echo ""
+    echo "      Usage: ./make_release_binaries.sh <amd|arm> <RELEASE VERSION> <SOURCECODE DIRECTORY>"
+    echo "";
+    exit 0
+fi
+
+set -e -o pipefail
+set -x
+
+ARCH=$1 # amd or arm
+VERSION=$2 # Full yubico-piv-tool version, tex 2.1.0
+SOURCE_DIR=$3 # Path to the source tarball, e.g. yubihsm-shell-2.1.0.tar.gz
+
+if [ "$ARCH" == "amd" ]; then
+  BREW_LIB="/usr/local/opt"
+  #BREW_CELLAR="/usr/local/Cellar"
+elif [ "$ARCH" == "arm" ]; then
+  BREW_LIB="/opt/homebrew/opt"
+  #BREW_CELLAR="/opt/homebrew/Cellar"
+else
+  echo "Unknown architecture"
+  exit
+fi
+
+echo "BREW_LIB: $BREW_LIB"
+export PKG_CONFIG_PATH=$BREW_LIB/openssl/lib/pkgconfig
+
+## Define paths
+OUTPUT=$PWD/yubihsm-shell-darwin-$ARCH-$VERSION
+CMAKE_INSTALL_PREFIX="/usr/local/"
+LICENSE_DIR=$OUTPUT/$CMAKE_INSTALL_PREFIX/share/licenses/yubihsm-shell
+
+## Build binaries
+cd $SOURCE_DIR
+mkdir build; cd build
+cmake -DRELEASE_BUILD=1 ..
+make
+make install DESTDIR="$OUTPUT"
+
+## Copy licenses
+mkdir -p $LICENSE_DIR
+cp $SOURCE_DIR/LICENSE $LICENSE_DIR/yubihsm-shell
+cp $BREW_LIB/openssl/LICENSE.txt $LICENSE_DIR/openssl
+cp $BREW_LIB/libusb/COPYING $LICENSE_DIR/libusb
+cp $BREW_LIB/zlib/LICENSE $LICENSE_DIR/zlib
+
+
+## Copy third party libraries and headers included in the release
+cd $OUTPUT/$CMAKE_INSTALL_PREFIX
+cp -r $BREW_LIB/openssl/include/openssl include/
+cp $BREW_LIB/openssl/lib/libcrypto.3.dylib lib/
+cp $BREW_LIB/libusb/lib/libusb-1.0.0.dylib lib/
+cp $BREW_LIB/zlib/lib/libz.1.dylib lib/
+
+## Fix file permissions of the third party libraries
+chmod +w $OUTPUT/$CMAKE_INSTALL_PREFIX/lib/libcrypto.3.dylib
+chmod +w $OUTPUT/$CMAKE_INSTALL_PREFIX/lib/libusb-1.0.0.dylib
+chmod +w $OUTPUT/$CMAKE_INSTALL_PREFIX/lib/libz.1.dylib
+
+## Fix third-party dylib install names to use @rpath
+install_name_tool -id @rpath/libcrypto.3.dylib lib/libcrypto.3.dylib
+install_name_tool -id @rpath/libusb-1.0.0.dylib lib/libusb-1.0.0.dylib
+install_name_tool -id @rpath/libz.1.dylib lib/libz.1.dylib
+
+install_name_tool -change $BREW_LIB/openssl@3/lib/libcrypto.3.dylib @rpath/libcrypto.3.dylib lib/libyubihsm.$VERSION.dylib
+install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.1.dylib lib/libyubihsm.$VERSION.dylib
+otool -L lib/libyubihsm.$VERSION.dylib
+
+install_name_tool -change $BREW_LIB/libusb/lib/libusb-1.0.0.dylib  @rpath/libusb-1.0.0.dylib lib/libyubihsm_usb.$VERSION.dylib
+otool -L lib/libyubihsm_usb.$VERSION.dylib
+
+install_name_tool -change $BREW_LIB/openssl@3/lib/libcrypto.3.dylib @rpath/libcrypto.3.dylib lib/pkcs11/yubihsm_pkcs11.dylib
+install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.1.dylib lib/pkcs11/yubihsm_pkcs11.dylib
+otool -L lib/pkcs11/yubihsm_pkcs11.dylib
+otool -l lib/pkcs11/yubihsm_pkcs11.dylib | grep LC_RPATH -A 3
+
+otool -L lib/libykhsmauth.dylib
+otool -l lib/libykhsmauth.dylib | grep LC_RPATH -A 3
+
+install_name_tool -change $BREW_LIB/openssl@3/lib/libcrypto.3.dylib @rpath/libcrypto.3.dylib bin/yubihsm-shell
+install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.1.dylib bin/yubihsm-shell
+otool -L bin/yubihsm-shell
+otool -l bin/yubihsm-shell | grep LC_RPATH -A 3
+
+install_name_tool -change $BREW_LIB/openssl@3/lib/libcrypto.3.dylib @rpath/libcrypto.3.dylib bin/yubihsm-wrap
+install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.1.dylib bin/yubihsm-wrap
+otool -L bin/yubihsm-wrap
+otool -l bin/yubihsm-wrap | grep LC_RPATH -A 3
+
+install_name_tool -change $BREW_LIB/openssl@3/lib/libcrypto.3.dylib @rpath/libcrypto.3.dylib bin/yubihsm-auth
+otool -L bin/yubihsm-auth
+otool -l bin/yubihsm-auth | grep LC_RPATH -A 3
