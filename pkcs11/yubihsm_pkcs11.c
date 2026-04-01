@@ -1658,6 +1658,17 @@ CK_DEFINE_FUNCTION(CK_RV, C_CreateObject)
         case CKA_ID:
         case CKA_LABEL:
         case CKA_APPLICATION:
+        /* Added for opaque objects with CKA_APPLICATION other than 'Opaque object': */
+          if (pTemplate[i].ulValueLen > CKA_ATTRIBUTE_VALUE_SIZE) {
+            DBG_ERR("CKA_APPLICATION value too large");
+            rv = CKR_ATTRIBUTE_VALUE_INVALID;
+            goto c_co_out;
+          }
+          meta_object.cka_application.len = pTemplate[i].ulValueLen;
+          memcpy(meta_object.cka_application.value,
+          pTemplate[i].pValue,
+          pTemplate[i].ulValueLen);
+          break;
         case CKA_OBJECT_ID:
         case CKA_SUBJECT:
         case CKA_ISSUER:
@@ -1684,8 +1695,12 @@ CK_DEFINE_FUNCTION(CK_RV, C_CreateObject)
       rv = yrc_to_rv(rc);
       goto c_co_out;
     }
-    if (algo == YH_ALGO_OPAQUE_X509_CERTIFICATE &&
-        (meta_object.cka_id.len > 0 || meta_object.cka_label.len > 0)) {
+     /* Modified to support opaque objects with CKA_APPLICATION other than 'Opaque object' */
+    if ((meta_object.cka_id.len > 0 ||
+      meta_object.cka_label.len > 0 ||
+      meta_object.cka_application.len > 0) &&
+      (algo == YH_ALGO_OPAQUE_X509_CERTIFICATE ||
+      algo == YH_ALGO_OPAQUE_DATA)) {
       meta_object.target_id = template.id;
     }
   } else if (class.d == CKO_PUBLIC_KEY) {
