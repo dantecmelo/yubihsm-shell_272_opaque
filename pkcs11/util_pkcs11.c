@@ -744,7 +744,14 @@ static uint16_t read_meta_item(uint8_t *value, cka_meta_item *meta_item) {
  * byte 4: Original object type (always present)
  * byte 5 and 6: Original object ID (always present)
  * byte 7: original object sequence
- * byte 8 and onward: TLV tripplets
+ * byte 8 and onward: TLV triplets
+ *
+ * Known TLV tags:
+ *   1 = PKCS11_ID_TAG          — CKA_ID for private/data key
+ *   2 = PKCS11_LABEL_TAG       — CKA_LABEL for private/data key
+ *   3 = PKCS11_PUBKEY_ID_TAG   — CKA_ID for public key
+ *   4 = PKCS11_PUBKEY_LABEL_TAG — CKA_LABEL for public key
+ *   5 = PKCS11_APPLICATION_TAG  — CKA_APPLICATION for opaque data objects
  */
 static CK_RV read_meta_object(yubihsm_pkcs11_slot *slot, uint16_t opaque_id,
                               pkcs11_meta_object *meta_object) {
