@@ -1,0 +1,1 @@
+# yubihsm-shell_opaque
