@@ -1,0 +1,5 @@
+#! /usr/bin/dh-exec
+usr/lib/libykhsmauth*.so /usr/lib/
+usr/share/pkgconfig/ykhsmauth.pc /usr/lib/
+
+usr/include/ykhsmauth.h

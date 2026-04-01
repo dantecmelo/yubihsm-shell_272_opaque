@@ -1,0 +1,153 @@
+yubihsm-shell (2.7.2) unstable; urgency=medium
+
+    * lib: Ensure that command audit for command 0x05 cannot be turned on
+    * pkcs11: Improve handling of public key component of RSA Wrap Key
+    * pkcs11: Fix a bug where generating an RSA key pair can potentially result in the wrong type of object being created
+    * build: Upgrade minimum CMake version requirement
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Thu, 12 Mar 2026 05:11:13 +0100
+
+yubihsm-shell (2.7.1) unstable; urgency=medium
+
+    * shell: Add support for decrypt-oaep command in non-interactive mode
+    * test: Improve testing processes
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Sat, 17 Jan 2026 10:58:49 +0100
+
+yubihsm-shell (2.7.0) unstable; urgency=medium
+
+    * lib: shell: pkcs11: Add support for compressing X509Certificate before import
+    * shell: Add subcommand to generate certificate signing request (CSR)
+    * test: Increase test coverage
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Tue, 10 Jun 2025 10:56:54 +0100
+
+yubihsm-shell (2.6.0) unstable; urgency=medium
+
+    * lib: shell: pkcs11: Add support for asymmetric wrap
+    * pkcs11: Add support for PKCS11 3.0
+    * cmd: Fix opening a session using credentials stored on a YubiKey
+    * build: Always compile with YubiHSM Auth enabled
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Thu, 8 Aug 2024 16:08:45 +0100
+
+yubihsm-shell (2.5.0) unstable; urgency=medium
+
+	* pkcs11: Add support for applying KDF after ECDH derivation
+	* pkcs11: shell: Fix minor bugs
+	* test: Increase test coverage
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Mon, 25 Mar 2024 23:27:50 +0100
+
+yubihsm-shell (2.4.2) unstable; urgency=medium
+
+	* pkcs11: Add Symmetric key capabilities to searchable criteria
+	* pkcs11: Add support for CKA_KEY_TYPE when searching for objects
+	* pkcs11: Add support for CKA_MODIFIABLE and CKA_COPYABLE attributes for AES and Wrap keys
+	* test: Increase test coverage
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Mon, 30 Oct 2023 14:55:20 +0100
+
+yubihsm-shell (2.4.1) unstable; urgency=medium
+
+	* pkcs11: Allow only a user with access to all the object's domains to edit its attributes
+	* pkcs11: Allow for the creation of an asymmetric key even if CKA_ID or CKA_LABEL attribute values for the private and public key are different.
+	* pkcs11: Improve backup capabilities of objects whose attributes have been changed
+	* test: Improve test coverage
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Wed, 29 Mar 2023 15:14:26 +0100
+
+yubihsm-shell (2.4.0) unstable; urgency=medium
+
+  * lib: shell: pkcs11: Add support for symmetric encryption, AES-ECB and AES-CBC (Requires firmware version 2.3 and later)
+  * shell: Enable asymmetric authentication by default (Requires firmware version 2.3 and later)
+  * shell: Allow hex format when creating symmetric authentication key
+  * shell: Improve usage of the list command
+  * shell: Allow yubihsm-auth reader to be specified
+  * shell: Enable backend TLS support in the command line
+  * pkcs11: Add support for modifying CKA_ID and CKA_LABEL attribute values
+  * pkcs11: Improve handling of attributes
+  * pkcs11: Improve debug output
+  * pkcs11: Improve error handling
+  * pkcs11: Change in firmware/harware version representation. The version as reported by C_GetSlotInfo and C_GetTokenInfo will now show minor*10+patch, instead of minor*100+patch
+  * build: Dependecy updates
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Sun, 15 Jan 2023 15:46:56 +0100
+
+yubihsm-shell (2.3.2) unstable; urgency=medium
+
+  * 2.3.2 release
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Tue, 14 Jun 2022 10:55:28 +0100
+
+yubihsm-shell (2.3.1) unstable; urgency=medium
+
+  * 2.3.1 release
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Wed, 2 Feb 2022 10:28:21 +0100
+
+yubihsm-shell (2.3.0) unstable; urgency=medium
+
+  * 2.3.0 release
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Wed, 24 Nov 2021 19:28:09 +0100
+
+yubihsm-shell (2.1.0) unstable; urgency=medium
+
+  * 2.1.0 release
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Mon, 1 Mar 2021 16:28:03 +0100
+
+yubihsm-shell (2.0.3) unstable; urgency=medium
+
+  * 2.0.3 release
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Tue, 13 Oct 2020 13:37:10 +0100
+
+yubihsm-shell (2.0.2) unstable; urgency=medium
+
+  * 2.0.2 release
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Wed, 20 Nov 2019 12:18:56 +0000
+
+yubihsm-shell (2.0.1) unstable; urgency=medium
+
+  * 2.0.1 release. 
+
+ -- Aveen Ismail <aveen.ismail@yubico.com>  Thu, 28 Mar 2019 08:10:37 +0000
+
+yubihsm-shell (2.0.0) unstable; urgency=medium
+
+  * 2.0.0 release.
+
+ -- Klas Lindfors <klas@yubico.com>  Mon, 05 Nov 2018 12:02:23 +0100
+
+yubihsm-shell (1.0.4) unstable; urgency=medium
+
+  * 1.0.4 release.
+
+ -- Klas Lindfors <klas@yubico.com>  Tue, 29 May 2018 12:39:05 +0200
+
+yubihsm-shell (1.0.3) unstable; urgency=medium
+
+  * 1.0.3 release.
+
+ -- Klas Lindfors <klas@yubico.com>  Wed, 25 Apr 2018 08:12:54 +0200
+
+yubihsm-shell (1.0.2) unstable; urgency=medium
+
+  * 1.0.2 release.
+
+ -- Klas Lindfors <klas@yubico.com>  Wed, 04 Apr 2018 13:55:59 +0200
+
+yubihsm-shell (1.0.1) unstable; urgency=medium
+
+  * 1.0.1 release.
+
+ -- Klas Lindfors <klas@yubico.com>  Fri, 19 Jan 2018 14:12:32 +0100
+
+yubihsm-shell (1.0.0) unstable; urgency=low
+
+  * Initial release.
+
+ -- Alessio Di Mauro <alessio@yubico.com>  Thu, 07 Dec 2017 15:16:43 +0200
