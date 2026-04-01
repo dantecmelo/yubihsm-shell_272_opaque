@@ -914,16 +914,21 @@ CK_RV write_meta_object(yubihsm_pkcs11_slot *slot,
     return CKR_FUNCTION_REJECTED;
   }
 
+  /* MODIFIED: added cka_application to the serialized length calculation */
   size_t opaque_value_len =
-    8 /* 4 version + 1 original type + 2 original ID 1 opaque sequence */ +
+    8 /* 4 version + 1 original type + 2 original ID + 1 opaque sequence */ +
     (meta_object->cka_id.len == 0 ? 0 : 3 + meta_object->cka_id.len) +
     (meta_object->cka_label.len == 0 ? 0 : 3 + meta_object->cka_label.len) +
     (meta_object->cka_id_pubkey.len == 0 ? 0
                                          : 3 + meta_object->cka_id_pubkey.len) +
     (meta_object->cka_label_pubkey.len == 0
        ? 0
-       : 3 + meta_object->cka_label_pubkey.len);
-  // 3: 1 tag + 2 value length
+       : 3 + meta_object->cka_label_pubkey.len) +
+    /* ADDED: space for the application tag TLV */
+    (meta_object->cka_application.len == 0
+       ? 0
+       : 3 + meta_object->cka_application.len);
+  // 3 bytes per TLV item: 1 tag + 2 value length
 
   if (opaque_value_len > (YH_MSG_BUF_SIZE - 20)) {
     DBG_ERR("Failed to write meta object to device. Meta object too large.");
@@ -948,6 +953,8 @@ CK_RV write_meta_object(yubihsm_pkcs11_slot *slot,
   p += write_meta_item(p, PKCS11_PUBKEY_ID_TAG, &meta_object->cka_id_pubkey);
   p +=
     write_meta_item(p, PKCS11_PUBKEY_LABEL_TAG, &meta_object->cka_label_pubkey);
+  /* ADDED: serialise CKA_APPLICATION into the meta object blob */
+  p += write_meta_item(p, PKCS11_APPLICATION_TAG, &meta_object->cka_application);
 
   char opaque_label[YH_OBJ_LABEL_LEN] = {0};
   snprintf(opaque_label, sizeof(opaque_label), "Meta object for 0x%02x%02x%04x",
