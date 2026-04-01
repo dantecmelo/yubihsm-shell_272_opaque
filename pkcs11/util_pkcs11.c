@@ -768,7 +768,7 @@ static CK_RV read_meta_object(yubihsm_pkcs11_slot *slot, uint16_t opaque_id,
 
   // 4 (version) + 1 (object type) + 2 (id) + 1 (sequence)
   if (opaque_value_len < 8) {
-    DBG_ERR("Opaque value to import is too small to be a meta obeject data");
+    DBG_ERR("Opaque value to import is too small to be a meta object data");
     return CKR_DATA_INVALID;
   }
 
@@ -800,6 +800,10 @@ static CK_RV read_meta_object(yubihsm_pkcs11_slot *slot, uint16_t opaque_id,
         break;
       case PKCS11_PUBKEY_LABEL_TAG:
         len = read_meta_item(p, &meta_object->cka_label_pubkey);
+        break;
+      /* ADDED: deserialise CKA_APPLICATION from the meta object blob */
+      case PKCS11_APPLICATION_TAG:
+        len = read_meta_item(p, &meta_object->cka_application);
         break;
       default:
         DBG_ERR("Unknown tag in value of opaque PKCS11 object");
