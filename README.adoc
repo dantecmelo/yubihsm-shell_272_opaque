@@ -57,7 +57,7 @@ typedef struct {
 
 Near the existing tag definitions:
 
-c#define PKCS11_ID_TAG          1
+#define PKCS11_ID_TAG          1
 #define PKCS11_LABEL_TAG       2
 #define PKCS11_PUBKEY_ID_TAG   3
 #define PKCS11_PUBKEY_LABEL_TAG 4
