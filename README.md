@@ -1,1 +1,1 @@
-# yubihsm-shell_opaque
+README.adoc
