@@ -68,6 +68,8 @@ typedef struct {
   cka_meta_item cka_id_pubkey;
   /// CKA_LABEL for public key
   cka_meta_item cka_label_pubkey;
+  /// CKA_APPLICATION for opaque object
+  cka_meta_item cka_application;
 } pkcs11_meta_object;
 
 typedef struct {
