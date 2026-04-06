@@ -91,7 +91,7 @@ In read_meta_object, add a case to the TLV parsing loop:
 case PKCS11_APPLICATION_TAG:
     len = read_meta_item(p, &meta_object->cka_application);
     break;
-~~~
+```
 
 ==== 4. Parse and store CKA_APPLICATION in C_CreateObject in yubihsm_pkcs11.c
 
