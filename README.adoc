@@ -1,3 +1,5 @@
+= Patched YubiHSM Shell 
+
 == YubiHSM 2.7.2 opaque
 
 This is a modified version of the YubiHSM Shell 2.7.2 that accepts values other than `Opaque object` for the `CKA_APPLICATION` attribute of CKO_DATA objects.
