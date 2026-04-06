@@ -10,7 +10,7 @@ There are two separate bugs that together cause your observation: one at write t
 
 In yubihsm_pkcs11.c, the CKO_DATA branch of C_CreateObject lists CKA_APPLICATION in its switch statement but does nothing with it — it just breaks:
 
-~~~
+```
 case CKA_TOKEN:
 case CKA_CLASS:
 case CKA_ID:
@@ -20,7 +20,7 @@ case CKA_OBJECT_ID:
 case CKA_SUBJECT:
 ...
   break;
-~~~
+```
 
 The value you pass in is thrown away before the yh_util_import_opaque_ex call is ever made.
 
