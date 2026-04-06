@@ -1,6 +1,6 @@
 == YubiHSM 2.7.2 opaque
 
-This is a modified version of the YubiHSM Shell 2.7.2 that accepts values other than 'Opaque object' for the CKA_APPLICATION attribute of CKO_DATA objects.
+This is a modified version of the YubiHSM Shell 2.7.2 that accepts values other than `Opaque object` for the `CKA_APPLICATION` attribute of CKO_DATA objects.
 
 === Root Cause Analysis
 
@@ -40,11 +40,11 @@ There is no mechanism to read back anything else. Even if you had managed to per
 
 === Why There Is No Easy Storage Slot
 
-The YubiHSM 2 firmware YH_OPAQUE object has a fixed schema: id, label, domains, capabilities, algorithm, and value. There is no native application field. The library already solves the analogous problem for CKA_ID and CKA_LABEL on asymmetric/certificate objects using a meta object — a second YH_OPAQUE object stored alongside the target object whose value carries TLV-encoded PKCS#11 metadata. You need to extend that system.
+The YubiHSM 2 firmware `YH_OPAQUE` object has a fixed schema: id, label, domains, capabilities, algorithm, and value. There is no native application field. The library already solves the analogous problem for `CKA_ID` and `CKA_LABEL` on asymmetric/certificate objects using a meta object — a second `YH_OPAQUE` object stored alongside the target object whose value carries TLV-encoded PKCS#11 metadata. You need to extend that system.
 
 === Required Changes
 
-==== 1. Add cka_application to pkcs11_meta_object in yubihsm_pkcs11.h
+==== 1. Add `cka_application` to `pkcs11_meta_object` in `yubihsm_pkcs11.h`
 
 ```
 typedef struct {
@@ -59,7 +59,7 @@ typedef struct {
 } pkcs11_meta_object;
 ```
 
-==== 2. Add a new TLV tag constant in util_pkcs11.c
+==== 2. Add a new TLV tag constant in `util_pkcs11.c`
 
 Near the existing tag definitions:
 
@@ -73,7 +73,7 @@ Near the existing tag definitions:
 
 ==== 3. Wire the tag into write_meta_object and read_meta_object in util_pkcs11.c
 
-In write_meta_object, add to both the length calculation and the serialization:
+In `write_meta_object`, add to both the length calculation and the serialization:
 
 ```
 // Length calculation — add this alongside the existing cka_label_pubkey term:
