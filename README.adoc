@@ -165,6 +165,7 @@ After these changes, the flow becomes:
 
 One thing to be aware of: the `find_meta_object_by_target` call in `get_attribute` matches on `target_domains`. Make sure the authentication key used has domain access that overlaps with the domain the opaque object was stored in, which is already a requirement for the existing meta-object machinery.
 
+= Original YubiHSM Shell README
 
 == YubiHSM Shell
 
