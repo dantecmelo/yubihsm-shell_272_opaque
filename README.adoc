@@ -95,7 +95,7 @@ case PKCS11_APPLICATION_TAG:
 
 ==== 4. Parse and store CKA_APPLICATION in C_CreateObject in yubihsm_pkcs11.c
 
-Add a pkcs11_meta_object local for the CKO_DATA branch (it already exists as meta_object in that scope). Change the silent break for CKA_APPLICATION into actual parsing:
+Add a `pkcs11_meta_object` local for the `CKO_DATA` branch (it already exists as `meta_object` in that scope). Change the silent `break` for `CKA_APPLICATION` into actual parsing:
 
 ```
 case CKA_APPLICATION:
@@ -111,7 +111,7 @@ case CKA_APPLICATION:
     break;
 ```
 
-Then, after the yh_util_import_opaque_ex call succeeds, trigger meta-object creation for CKO_DATA when cka_application is set (the existing code only triggers for CKO_CERTIFICATE). Extend the condition:
+Then, after the `yh_util_import_opaque_ex` call succeeds, trigger `meta-object` creation for `CKO_DATA` when `cka_application` is set (the existing code only triggers for `CKO_CERTIFICATE`). Extend the condition:
 
 ```
 // Was:
@@ -130,9 +130,9 @@ if ((meta_object.cka_id.len > 0 ||
 }
 ```
 
-==== 5. Fix get_attribute_opaque in util_pkcs11.c to read back the stored value
+==== 5. Fix `get_attribute_opaque` in `util_pkcs11.c` to read back the stored value
 
-The function already receives a meta_object pointer. Change the hardcoded case:
+The function already receives a `meta_object` pointer. Change the hardcoded case:
 
 ```
 case CKA_APPLICATION: {
@@ -157,13 +157,13 @@ case CKA_APPLICATION: {
 
 After these changes, the flow becomes:
 
-1. C_CreateObject — parses CKA_APPLICATION into meta_object.cka_application, then calls write_meta_object which serializes it as a TLV tag 5 blob into a companion YH_OPAQUE object on the device, labelled "Meta object for 0x<seq><type><id>".
+1. `C_CreateObject`: Parses `CKA_APPLICATION` into `meta_object.cka_application`, then calls `write_meta_object` which serializes it as a TLV tag 5 blob into a companion `YH_OPAQUE` object on the device, labelled `Meta object for 0x<seq><type><id>`.
 
-2. Login / populate_cache_with_data_opaques — loads all YH_ALGO_OPAQUE_DATA objects including both the data object and its meta companion, into the slot cache. _get_object_desc detects the meta object via is_meta_object and calls read_meta_object, which deserializes TLV tag 5 back into meta_object.cka_application.
+2. Login / `populate_cache_with_data_opaques`: Loads all `YH_ALGO_OPAQUE_DATA` objects, including both the data object and its meta companion, into the slot cache. `_get_object_desc` detects the meta object via `is_meta_object` and calls `read_meta_object`, which deserializes TLV tag 5 back into `meta_object.cka_application`.
 
-3. C_GetAttributeValue → get_attribute_opaque — find_meta_object_by_target locates the companion in cache; get_attribute_opaque reads meta_object->cka_application and returns your stored string instead of the hardcoded one.
+3. `C_GetAttributeValue->get_attribute_opaque`: `find_meta_object_by_target` locates the companion in cache; `get_attribute_opaque` reads `meta_object->cka_application` and returns your stored string instead of the hardcoded one.
 
-One thing to be aware of: the find_meta_object_by_target call in get_attribute matches on target_domains. Make sure the authentication key used has domain access that overlaps with the domain the opaque object was stored in, which is already a requirement for the existing meta-object machinery.
+One thing to be aware of: the `find_meta_object_by_target` call in `get_attribute` matches on `target_domains`. Make sure the authentication key used has domain access that overlaps with the domain the opaque object was stored in, which is already a requirement for the existing meta-object machinery.
 
 
 == YubiHSM Shell
