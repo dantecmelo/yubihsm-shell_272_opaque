@@ -24,7 +24,7 @@ case CKA_SUBJECT:
 
 The value you pass in is thrown away before the `yh_util_import_opaque_ex` call is ever made.
 
-==== Issue 2 — get_attribute_opaque always returns a hardcoded string
+==== Issue 2 — `get_attribute_opaque` always returns a hardcoded string
 
 In `util_pkcs11.c`, inside `get_attribute_opaque`, the `CKA_APPLICATION` case is hardcoded unconditionally:
 
@@ -71,7 +71,7 @@ Near the existing tag definitions:
 #define PKCS11_APPLICATION_TAG  5   // <-- add this
 ```
 
-==== 3. Wire the tag into write_meta_object and read_meta_object in util_pkcs11.c
+==== 3. Wire the tag into `write_meta_object` and `read_meta_object` in `util_pkcs11.c`
 
 In `write_meta_object`, add to both the length calculation and the serialization:
 
@@ -93,7 +93,7 @@ case PKCS11_APPLICATION_TAG:
     break;
 ```
 
-==== 4. Parse and store CKA_APPLICATION in C_CreateObject in yubihsm_pkcs11.c
+==== 4. Parse and store `CKA_APPLICATION` in `C_CreateObject` in `yubihsm_pkcs11.c`
 
 Add a `pkcs11_meta_object` local for the `CKO_DATA` branch (it already exists as `meta_object` in that scope). Change the silent `break` for `CKA_APPLICATION` into actual parsing:
 
