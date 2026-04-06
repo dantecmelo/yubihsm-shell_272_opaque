@@ -157,6 +157,12 @@ case CKA_APPLICATION: {
 
 === How It All Fits Together at Runtime
 
+Modified files:
+
+* `util_pkcs11.c`
+* `yubihsm_pkcs11.h`
+* `yubihsm_pkcs11.c`
+
 After these changes, the flow becomes:
 
 1. `C_CreateObject`: Parses `CKA_APPLICATION` into `meta_object.cka_application`, then calls `write_meta_object` which serializes it as a TLV tag 5 blob into a companion `YH_OPAQUE` object on the device, labelled `Meta object for 0x<seq><type><id>`.
