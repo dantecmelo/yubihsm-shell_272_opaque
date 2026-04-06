@@ -10,6 +10,7 @@ There are two separate bugs that together cause your observation: one at write t
 
 In yubihsm_pkcs11.c, the CKO_DATA branch of C_CreateObject lists CKA_APPLICATION in its switch statement but does nothing with it — it just breaks:
 
+~~~
 case CKA_TOKEN:
 case CKA_CLASS:
 case CKA_ID:
@@ -19,6 +20,7 @@ case CKA_OBJECT_ID:
 case CKA_SUBJECT:
 ...
   break;
+~~~
 
 The value you pass in is thrown away before the yh_util_import_opaque_ex call is ever made.
 
@@ -26,11 +28,13 @@ The value you pass in is thrown away before the yh_util_import_opaque_ex call is
 
 In util_pkcs11.c, inside get_attribute_opaque, the CKA_APPLICATION case is hardcoded unconditionally:
 
+~~~
 case CKA_APPLICATION: {
   char *str = "Opaque object";
   strcpy((char *) value, str);
   *length = strlen(str);
 } break;
+~~~
 
 There is no mechanism to read back anything else. Even if you had managed to persist the value somewhere, this code would always overwrite the response.
 
@@ -42,6 +46,7 @@ The YubiHSM 2 firmware YH_OPAQUE object has a fixed schema: id, label, domains, 
 
 ==== 1. Add cka_application to pkcs11_meta_object in yubihsm_pkcs11.h
 
+~~~
 typedef struct {
   uint16_t target_id;
   yh_object_type target_type;
@@ -52,21 +57,25 @@ typedef struct {
   cka_meta_item cka_label_pubkey;
   cka_meta_item cka_application;   // <-- add this
 } pkcs11_meta_object;
+~~~
 
 ==== 2. Add a new TLV tag constant in util_pkcs11.c
 
 Near the existing tag definitions:
 
+~~~
 #define PKCS11_ID_TAG          1
 #define PKCS11_LABEL_TAG       2
 #define PKCS11_PUBKEY_ID_TAG   3
 #define PKCS11_PUBKEY_LABEL_TAG 4
 #define PKCS11_APPLICATION_TAG  5   // <-- add this
+~~~
 
 ==== 3. Wire the tag into write_meta_object and read_meta_object in util_pkcs11.c
 
 In write_meta_object, add to both the length calculation and the serialization:
 
+~~~
 // Length calculation — add this alongside the existing cka_label_pubkey term:
 + (meta_object->cka_application.len == 0
        ? 0
@@ -74,17 +83,21 @@ In write_meta_object, add to both the length calculation and the serialization:
 
 // Serialization — add after the existing write_meta_item calls:
 p += write_meta_item(p, PKCS11_APPLICATION_TAG, &meta_object->cka_application);
+~~~
 
 In read_meta_object, add a case to the TLV parsing loop:
 
+~~~
 case PKCS11_APPLICATION_TAG:
     len = read_meta_item(p, &meta_object->cka_application);
     break;
+~~~
 
 ==== 4. Parse and store CKA_APPLICATION in C_CreateObject in yubihsm_pkcs11.c
 
 Add a pkcs11_meta_object local for the CKO_DATA branch (it already exists as meta_object in that scope). Change the silent break for CKA_APPLICATION into actual parsing:
 
+~~~
 case CKA_APPLICATION:
     if (pTemplate[i].ulValueLen > CKA_ATTRIBUTE_VALUE_SIZE) {
         DBG_ERR("CKA_APPLICATION value too large");
@@ -96,9 +109,11 @@ case CKA_APPLICATION:
            pTemplate[i].pValue,
            pTemplate[i].ulValueLen);
     break;
+~~~
 
 Then, after the yh_util_import_opaque_ex call succeeds, trigger meta-object creation for CKO_DATA when cka_application is set (the existing code only triggers for CKO_CERTIFICATE). Extend the condition:
 
+~~~
 // Was:
 if (algo == YH_ALGO_OPAQUE_X509_CERTIFICATE &&
     (meta_object.cka_id.len > 0 || meta_object.cka_label.len > 0)) {
@@ -113,11 +128,13 @@ if ((meta_object.cka_id.len > 0 ||
      algo == YH_ALGO_OPAQUE_DATA)) {
     meta_object.target_id = template.id;
 }
+~~~
 
 ==== 5. Fix get_attribute_opaque in util_pkcs11.c to read back the stored value
 
 The function already receives a meta_object pointer. Change the hardcoded case:
 
+~~~
 case CKA_APPLICATION: {
     if (meta_object != NULL && meta_object->cka_application.len > 0) {
         if (*length < meta_object->cka_application.len) {
@@ -134,6 +151,7 @@ case CKA_APPLICATION: {
         *length = strlen(str);
     }
 } break;
+~~~
 
 === How It All Fits Together at Runtime
 
