@@ -6,9 +6,9 @@ This is a modified version of the YubiHSM Shell 2.7.2 that accepts values other 
 
 === Root Cause Analysis
 
-There are two separate bugs that together cause your observation: one at write time and one at read time.
+Two separate issues together cause custom values for CKA_APPLICATION to be ignored: one at write time and one at read time.
 
-==== Issue 1 — `C_CreateObject` silently discards `CKA_APPLICATION`
+==== Issue #1 — `C_CreateObject` silently discards `CKA_APPLICATION`
 
 In `yubihsm_pkcs11.c`, the `CKO_DATA` branch of `C_CreateObject` lists `CKA_APPLICATION` in its switch statement but does nothing with it — it just breaks:
 
@@ -26,7 +26,7 @@ case CKA_SUBJECT:
 
 The value you pass in is thrown away before the `yh_util_import_opaque_ex` call is ever made.
 
-==== Issue 2 — `get_attribute_opaque` always returns a hardcoded string
+==== Issue #2 — `get_attribute_opaque` always returns a hardcoded string
 
 In `util_pkcs11.c`, inside `get_attribute_opaque`, the `CKA_APPLICATION` case is hardcoded unconditionally:
 
