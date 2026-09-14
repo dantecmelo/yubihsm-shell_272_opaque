@@ -1657,17 +1657,40 @@ CK_DEFINE_FUNCTION(CK_RV, C_CreateObject)
         case CKA_CLASS:
         case CKA_ID:
         case CKA_LABEL:
+          break;
+        /* Added for opaque objects with CKA_APPLICATION other than 'Opaque
+         * object'.
+         *
+         * This case MUST stay separate from the no-op labels above. It used to
+         * be appended to that group, and because C switch labels fall through,
+         * CKA_TOKEN/CKA_CLASS/CKA_ID/CKA_LABEL all executed this body too --
+         * each one overwriting cka_application with its own value. The value
+         * that survived was simply whichever of the five appeared last in the
+         * template, so a caller sending e.g. LABEL, APPLICATION, CLASS, TOKEN
+         * silently stored the CK_BBOOL from CKA_TOKEN instead of the tag, and
+         * C_CreateObject still returned CKR_OK. PKCS#11 templates are unordered
+         * sets, so parsing here must not depend on attribute order. */
         case CKA_APPLICATION:
-        /* Added for opaque objects with CKA_APPLICATION other than 'Opaque object': */
           if (pTemplate[i].ulValueLen > CKA_ATTRIBUTE_VALUE_SIZE) {
             DBG_ERR("CKA_APPLICATION value too large");
             rv = CKR_ATTRIBUTE_VALUE_INVALID;
             goto c_co_out;
           }
+          if (pTemplate[i].ulValueLen > 0 && pTemplate[i].pValue == NULL) {
+            DBG_ERR("CKA_APPLICATION has a length but no value");
+            rv = CKR_ATTRIBUTE_VALUE_INVALID;
+            goto c_co_out;
+          }
+          if (meta_object.cka_application.len > 0) {
+            DBG_ERR("CKA_APPLICATION specified more than once in template");
+            rv = CKR_TEMPLATE_INCONSISTENT;
+            goto c_co_out;
+          }
           meta_object.cka_application.len = pTemplate[i].ulValueLen;
-          memcpy(meta_object.cka_application.value,
-          pTemplate[i].pValue,
-          pTemplate[i].ulValueLen);
+          if (pTemplate[i].ulValueLen > 0) {
+            memcpy(meta_object.cka_application.value, pTemplate[i].pValue,
+                   pTemplate[i].ulValueLen);
+          }
           break;
         case CKA_OBJECT_ID:
         case CKA_SUBJECT:
